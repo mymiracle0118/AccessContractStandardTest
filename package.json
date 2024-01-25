@@ -1,0 +1,26 @@
+{
+  "name": "@src/accessmanager",
+  "version": "1.0.0",
+  "private": true,
+  "description": "",
+  "files": [],
+  "scripts": {
+    "setup": "curl -L https://foundry.paradigm.xyz | bash && foundryup",
+    "compile": "forge build",
+    "clean": "forge clean",
+    "slither": "slither .",
+    "test": "npm run test:unit",
+    "test:unit": "forge test --match-path ./test/** -vvv",
+    "test:core": "forge test --match-path ./test/HelloWorld.t.sol -vvvvv --match-test testSetCoreSucceeds"
+  },
+  "authors": "Iwaki Hiroto",
+  "dependencies": {
+    "@openzeppelin/contracts": "4.9.3"
+  },
+  "devDependencies": {},
+  "lint-staged": {
+    "*.{sol}": [
+      "npx prettier --config .prettierrc 'src/**/*.sol' --write"
+    ]
+  }
+}
