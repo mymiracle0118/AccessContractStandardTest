@@ -12,6 +12,7 @@ contract Core is AccessControlEnumerable {
     constructor() {
         // renounceRole(bytes32 role, address account)
         _grantRole(Roles.ADMIN, msg.sender);
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
 
         // Initial roles setup: direct hierarchy, everything under governor
         _setRoleAdmin(Roles.GOVERNOR, Roles.ADMIN);

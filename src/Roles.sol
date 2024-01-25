@@ -13,7 +13,7 @@ library Roles {
     bytes32 internal constant GOVERNOR = keccak256("GOVERNOR_ROLE");
 
     /// @notice can do anything arbitrarily
-    bytes32 internal constant ADMIN = keccak256("ADMIN_ROLE");
+    bytes32 internal constant ADMIN = keccak256("ADMIN_ADMIN_ROLE");
 
     /// @notice
     bytes32 internal constant USER = keccak256("USER_ROLE");

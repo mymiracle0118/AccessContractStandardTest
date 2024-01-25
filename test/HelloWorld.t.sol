@@ -35,8 +35,8 @@ contract TesthelloWorld is Test {
 
     function setUp() public {
         core = new Core();
-        // console.log("test");
-        // console.log(uint256(Roles.ADMIN));
+        console.log("test");
+        console.log(uint256(Roles.ADMIN));
         core.grantRole(Roles.ADMIN, admin);
         core.grantRole(Roles.GOVERNOR, governor);
         core.grantRole(Roles.GUARDIAN, guardian);
