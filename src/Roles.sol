@@ -10,14 +10,14 @@ library Roles {
     /// ----------- Core roles for access control --------------
 
     /// @notice the all-powerful role. Controls all other roles and protocol functionality.
-    bytes32 internal constant GOVERNOR = keccak256("GOVERNOR_ROLE");
+    uint64 internal constant GOVERNOR = 40;
 
     /// @notice can do anything arbitrarily
-    bytes32 internal constant ADMIN = keccak256("ADMIN_ADMIN_ROLE");
+    uint64 internal constant ADMIN = 41;
 
     /// @notice
-    bytes32 internal constant USER = keccak256("USER_ROLE");
+    uint64 internal constant USER = 42;
 
     /// @notice
-    bytes32 internal constant GUARDIAN = keccak256("GUARDIAN_ROLE");
+    uint64 internal constant GUARDIAN = 43;
 }

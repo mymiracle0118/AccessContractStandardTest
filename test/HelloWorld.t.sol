@@ -35,25 +35,65 @@ contract TesthelloWorld is Test {
         vm.prank(admin);
         accessManager.grantRole(Role.ADMIN, admin, EXECUTION_DELAY);
 
+        accessManager.setRoleAdmin(Role.ADMIN, Role.ADMIN);
+        accessManager.setRoleAdmin(Role.GOVERNOR, Role.ADMIN);
+        accessManager.setRoleAdmin(Role.USER, Role.ADMIN);
+        accessManager.setRoleAdmin(Role.GUARDIAN, Role.ADMIN);
+
         accessManager.labelRole(Role.ADMIN, "ADMIN");
     }
 
     function testSchedule() public {}
 
     function testTargetClose() public {
+        vm.prank(admin);
         accessManager.setTargetClosed(helloWorld, true);
 
         vm.expectRevert();
         vm.prank(admin);
         helloWorld.hello();
 
+        vm.prank(admin);
         accessManager.setTargetClosed(target, false);
+
+        assertEq(accessManager.isTargetClosed(helloWorld), true);
 
         vm.expectRevert();
         helloWorld.hello();
 
         vm.expectEmit(true, true, false, true, address(helloWorld));
         emit HelloWorld();
+
+        assertEq(accessManager.isTargetClosed(helloWorld), false);
+    }
+
+    function testRoleRestriction() public {
+        vm.prank(admin);
+        accessManager.grantRole(Roles.GOVENER, alice, EXECUTION_DELAY);
+        (isGoverner, roleDelay) = accessManager.hasRole(Roles.GOVENER, alice);
+
+        assertEq(isGoverner, true);
+        assertEq(roleDelay, EXECUTION_DELAY);
+
+        accessManager.setTargetFunctionRole(
+            helloWorld,
+            [helloWorld.hello.selector],
+            Roles.GOVENER
+        );
+        vm.prank(alice);
+
+        vm.expectEmit(true, true, false, true, address(helloWorld));
+        emit HelloWorld();
+
+        helloWorld.hello();
+
+        vm.warp(block.timestamp + ROUND_DURATION);
+
+        vm.prank(alice);
+
+        vm.expectRevert();
+
+        helloWorld.hello();
     }
 
     // function testSetCoreSucceeds() public {
