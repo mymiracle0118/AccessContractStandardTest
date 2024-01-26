@@ -46,7 +46,7 @@ error WrongOwner(address provided);
 error MultisigExecFailed(address provided);
 
 /// @title Gnosis Safe Same Address - Smart contract for Gnosis Safe verification of an already existent multisig address.
-/// @author Aleksandr Kuperman - <aleksandr.kuperman@valory.xyz>
+/// @author Iwaki Hiroto
 contract GnosisSafeSameAddressMultisig {
     // Default data size to be parsed as an address of a Gnosis Safe multisig proxy address
     // This exact size suggests that all the changes to the multisig have been performed and only validation is needed

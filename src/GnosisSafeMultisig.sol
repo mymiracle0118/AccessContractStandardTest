@@ -20,7 +20,7 @@ interface IGnosisSafeProxyFactory {
 error IncorrectDataLength(uint256 expected, uint256 provided);
 
 /// @title Gnosis Safe - Smart contract for Gnosis Safe multisig implementation of a generic multisig interface
-/// @author Aleksandr Kuperman - <aleksandr.kuperman@valory.xyz>
+/// @author Iwaki Hiroto
 contract GnosisSafeMultisig {
     // Selector of the Gnosis Safe setup function
     bytes4 public constant GNOSIS_SAFE_SETUP_SELECTOR = 0xb63e800d;
