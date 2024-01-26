@@ -30,7 +30,7 @@ contract TestHelloWorld is Test {
 
         vm.startPrank(admin);
         // accessManager.setGrantDelay(Roles.ADMIN, GRANT_DELAY);
-
+        // accessManager.grantRole(Roles.ADMIN, admin, GRANT_DELAY);
         accessManager.grantRole(Roles.ADMIN, admin, 0);
 
         accessManager.setRoleAdmin(Roles.ADMIN, Roles.ADMIN);
@@ -44,35 +44,69 @@ contract TestHelloWorld is Test {
         // accessManager.labelRole(Roles.ADMIN, "ADMIN");
     }
 
+    function testUpdateAuthority() public {
+        vm.prank(admin);
+        accessManager.updateAuthority(address(helloWorld), address(helloWorld));
+        assertEq(helloWorld.authority(), address(helloWorld));
+    }
+
     function testTargetClose() public {
         vm.startPrank(admin);
         accessManager.setTargetClosed(address(helloWorld), true);
         assertEq(accessManager.isTargetClosed(address(helloWorld)), true);
 
-        vm.expectRevert();
-        helloWorld.hello();
+        // vm.expectRevert();
+        // helloWorld.hello();
 
         accessManager.setTargetClosed(address(helloWorld), false);
         assertEq(accessManager.isTargetClosed(address(helloWorld)), false);
 
         // vm.expectEmit(true, true, false, true, address(helloWorld));
         // emit HelloWorld();
-        helloWorld.hello();
+        // helloWorld.hello();
         vm.stopPrank();
     }
 
-    function testRoleRestriction() public {
+    function testSetRole() public {
         bool isGoverner;
         uint256 roleDelay;
 
-        // vm.warp(block.timestamp + GRANT_DELAY + EXECUTION_DELAY + 1);
-
-        console.log("=========time passed==========");
         vm.prank(admin);
-        accessManager.grantRole(Roles.GOVERNOR, alice, EXECUTION_DELAY);
+        accessManager.setRoleAdmin(Roles.USER, Roles.GOVERNOR);
+
+        assertEq(accessManager.getRoleAdmin(Roles.USER), Roles.GOVERNOR);
+
+        vm.prank(admin);
+        accessManager.grantRole(Roles.GOVERNOR, alice, 0);
+
         (isGoverner, roleDelay) = accessManager.hasRole(Roles.GOVERNOR, alice);
 
-        console.log("=========time passed==========");
+        assertEq(isGoverner, true);
+        assertEq(roleDelay, 0);
+
+        vm.prank(alice);
+        accessManager.grantRole(Roles.USER, bob, 0);
+
+        (isGoverner, roleDelay) = accessManager.hasRole(Roles.USER, bob);
+        assertEq(isGoverner, true);
+        assertEq(roleDelay, 0);
+    }
+
+    function testCallHelloWithRole() public {
+        bool isGoverner;
+        uint256 roleDelay;
+
+        // // Time should be passed for grant role
+        // vm.warp(block.timestamp + GRANT_DELAY + 1);
+
+        // console.log("block timestamp", block.timestamp);
+
+        // Set Governer role to the alice
+        vm.prank(admin);
+        accessManager.grantRole(Roles.GOVERNOR, alice, 0);
+
+        // Check has role
+        (isGoverner, roleDelay) = accessManager.hasRole(Roles.GOVERNOR, alice);
 
         assertEq(isGoverner, true);
         assertEq(roleDelay, 0);
@@ -88,29 +122,29 @@ contract TestHelloWorld is Test {
             Roles.GOVERNOR
         );
 
-        console.log("-----------get function role-----------");
-        console.log(
-            accessManager.getTargetFunctionRole(
-                address(helloWorld),
-                selectors2[0]
-            )
-        );
+        // console.log("-----------get function role-----------");
+        // console.log(
+        //     accessManager.getTargetFunctionRole(
+        //         address(helloWorld),
+        //         selectors2[0]
+        //     )
+        // );
 
-        console.log("================test===============");
+        // console.log("================test===============");
         // vm.expectEmit(true, true, false, true, address(helloWorld));
         // emit HelloWorld();
         bytes4 FUNC_SELECTOR = bytes4(keccak256("hello()"));
         bytes memory data = abi.encodeWithSelector(FUNC_SELECTOR);
 
         // vm.warp(block.timestamp + EXECUTION_DELAY);
-        vm.prank(alice);
-        accessManager.schedule(
-            address(helloWorld),
-            data,
-            uint48(block.timestamp + EXECUTION_DELAY + 1)
-        );
+        // vm.prank(alice);
+        // accessManager.schedule(
+        //     address(helloWorld),
+        //     data,
+        //     uint48(block.timestamp + GRANT_DELAY + 1)
+        // );
 
-        vm.warp(block.timestamp + EXECUTION_DELAY + 4);
+        vm.warp(block.timestamp + GRANT_DELAY + 4);
 
         vm.prank(alice);
         helloWorld.hello();

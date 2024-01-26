@@ -11,7 +11,10 @@
     "slither": "slither .",
     "test": "npm run test:unit",
     "test:unit": "forge test --match-path ./test/** -vvvvv",
-    "test:core": "forge test --match-path ./test/HelloWorld.t.sol -vvvvv --match-test testSetCoreSucceeds"
+    "test:call": "forge test --match-path ./test/HelloWorld.t.sol -vvvvv --match-test testCallHelloWithRole",
+    "test:target": "forge test --match-path ./test/HelloWorld.t.sol -vvvvv --match-test testTargetClose",
+    "test:role": "forge test --match-path ./test/HelloWorld.t.sol -vvvvv --match-test testSetRole",
+    "test:update": "forge test --match-path ./test/HelloWorld.t.sol -vvvvv --match-test testUpdateAuthority"
   },
   "authors": "Iwaki Hiroto",
   "dependencies": {
