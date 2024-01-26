@@ -76,7 +76,7 @@ contract TestMockMultisigWallet is Test {
         multisigWallet.submitTransaction(
             address(helloWorld),
             0,
-            multisigWallet.getDataWithoutAccessManager()
+            multisigWallet.getDataWithAccessManager()
         );
         vm.stopPrank();
 
