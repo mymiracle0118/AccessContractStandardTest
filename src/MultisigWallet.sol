@@ -14,10 +14,12 @@ contract MultiSigWallet {
         bytes data
     );
     event ConfirmTransaction(address indexed owner, uint indexed txIndex);
+    event ModifyConfirmationNumber(uint, uint);
     event RevokeConfirmation(address indexed owner, uint indexed txIndex);
     event ExecuteTransaction(address indexed owner, uint indexed txIndex);
 
     address[] public owners;
+    address public admin;
     mapping(address => bool) public isOwner;
     uint public numConfirmationsRequired;
 
@@ -36,6 +38,11 @@ contract MultiSigWallet {
 
     modifier onlyOwner() {
         require(isOwner[msg.sender], "not owner");
+        _;
+    }
+
+    modifier onlyAdmin() {
+        require(msg.sender == admin, "not admin");
         _;
     }
 
@@ -72,11 +79,26 @@ contract MultiSigWallet {
             owners.push(owner);
         }
 
+        admin = msg.sender;
+
         numConfirmationsRequired = _numConfirmationsRequired;
     }
 
     receive() external payable {
         emit Deposit(msg.sender, msg.value, address(this).balance);
+    }
+
+    function setConfirmationNum(uint num) public onlyAdmin {
+        emit ModifyConfirmationNumber(numConfirmationsRequired, num);
+
+        numConfirmationsRequired = num;
+    }
+
+    function AddOwner(address owner) public onlyAdmin {
+        require(isOwner[owner] = false, "Already setted");
+
+        isOwner[owner] = true;
+        owners.push(owner);
     }
 
     function submitTransaction(
