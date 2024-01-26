@@ -30,20 +30,22 @@ contract TesthelloWorld is Test {
         helloWorld = new MockHelloWorld(accessManager);
 
         vm.prank(admin);
-        accessManager.setGrantDelay(Role.ADMIN, GRANT_DELAY);
+        accessManager.setGrantDelay(Roles.ADMIN, GRANT_DELAY);
 
         vm.prank(admin);
-        accessManager.grantRole(Role.ADMIN, admin, EXECUTION_DELAY);
+        accessManager.grantRole(Roles.ADMIN, admin, EXECUTION_DELAY);
 
-        accessManager.setRoleAdmin(Role.ADMIN, Role.ADMIN);
-        accessManager.setRoleAdmin(Role.GOVERNOR, Role.ADMIN);
-        accessManager.setRoleAdmin(Role.USER, Role.ADMIN);
-        accessManager.setRoleAdmin(Role.GUARDIAN, Role.ADMIN);
+        accessManager.setRoleAdmin(Roles.ADMIN, Roles.ADMIN);
+        accessManager.setRoleAdmin(Roles.GOVERNOR, Roles.ADMIN);
+        accessManager.setRoleAdmin(Roles.USER, Roles.ADMIN);
+        accessManager.setRoleAdmin(Roles.GUARDIAN, Roles.ADMIN);
 
-        accessManager.labelRole(Role.ADMIN, "ADMIN");
+        accessManager.labelRole(Roles.ADMIN, "ADMIN");
     }
 
-    function testSchedule() public {}
+    // function testSchedule() public {
+    //     accessManager.schedule(helloWorld, )
+    // }
 
     function testTargetClose() public {
         vm.prank(admin);
@@ -54,7 +56,7 @@ contract TesthelloWorld is Test {
         helloWorld.hello();
 
         vm.prank(admin);
-        accessManager.setTargetClosed(target, false);
+        accessManager.setTargetClosed(helloWorld, false);
 
         assertEq(accessManager.isTargetClosed(helloWorld), true);
 
@@ -69,8 +71,10 @@ contract TesthelloWorld is Test {
 
     function testRoleRestriction() public {
         vm.prank(admin);
-        accessManager.grantRole(Roles.GOVENER, alice, EXECUTION_DELAY);
-        (isGoverner, roleDelay) = accessManager.hasRole(Roles.GOVENER, alice);
+        bool isGoverner = false;
+        uint256 roleDelay;
+        accessManager.grantRole(Roles.GOVERNOR, alice, EXECUTION_DELAY);
+        (isGoverner, roleDelay) = accessManager.hasRole(Roles.GOVERNOR, alice);
 
         assertEq(isGoverner, true);
         assertEq(roleDelay, EXECUTION_DELAY);
@@ -78,7 +82,7 @@ contract TesthelloWorld is Test {
         accessManager.setTargetFunctionRole(
             helloWorld,
             [helloWorld.hello.selector],
-            Roles.GOVENER
+            Roles.GOVERNOR
         );
         vm.prank(alice);
 
@@ -87,7 +91,7 @@ contract TesthelloWorld is Test {
 
         helloWorld.hello();
 
-        vm.warp(block.timestamp + ROUND_DURATION);
+        vm.warp(block.timestamp + EXECUTION_DELAY);
 
         vm.prank(alice);
 
