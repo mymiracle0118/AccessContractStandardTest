@@ -15,12 +15,11 @@
     "test:target": "forge test --match-path ./test/HelloWorld.t.sol -vvvvv --match-test testTargetClose",
     "test:role": "forge test --match-path ./test/HelloWorld.t.sol -vvvvv --match-test testSetRole",
     "test:update": "forge test --match-path ./test/HelloWorld.t.sol -vvvvv --match-test testUpdateAuthority",
-    "test:multisig_create": "forge test --match-path ./test/GnosisSafeMultisig.t.sol -vvvvv --match-test testCreateFail"
+    "test:multisig_create": "forge test --match-path ./test/MultisigWallet.t.sol -vvvvv --match-test testCreateFail"
   },
   "authors": "Iwaki Hiroto",
   "dependencies": {
-    "@openzeppelin/contracts": "5.0",
-    "@gnosis.pm/safe-contracts": "^1.3.0"
+    "@openzeppelin/contracts": "5.0"
   },
   "devDependencies": {},
   "lint-staged": {

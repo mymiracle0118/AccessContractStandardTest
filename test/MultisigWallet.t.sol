@@ -10,6 +10,7 @@ import {console2} from "@forge-std/console2.sol";
 
 contract TestMockMultisigWallet is Test {
     address private admin = address(1);
+    uint256 confirmationCount = 2;
     address[] public defaultOwnerAddresses = [
         address(1),
         address(2),
@@ -24,15 +25,26 @@ contract TestMockMultisigWallet is Test {
     MockMultisigWallet private multisigWallet;
 
     function setUp() public {
-        // accessManager.labelRole(Roles.ADMIN, "ADMIN");
+        multisigWallet = new MockMultisigWallet(
+            defaultOwnerAddresses,
+            confirmationCount
+        );
     }
 
-    // Should fail when passing the non-zero multisig data with the incorrect number of bytes
+    // Should fail with same addresses input
     function testCreateFail() public {
+        address[] memory testOwnerAddresses = new address[](4);
+        testOwnerAddresses[0] = address(0);
+        testOwnerAddresses[1] = address(1);
+        testOwnerAddresses[2] = address(2);
+        testOwnerAddresses[3] = address(2);
         // vm.expectRevert();
-        // vm.expectRevert();
-        // console.log("test");
-        // gnosisSafeMultisig.create(defaultOwnerAddresses, threshold, "0x55");
+        MockMultisigWallet multisigWallet1;
+        vm.expectRevert("invalid owner");
+        multisigWallet1 = new MockMultisigWallet(
+            testOwnerAddresses,
+            confirmationCount
+        );
     }
 
     function testTargetClose() public {}
