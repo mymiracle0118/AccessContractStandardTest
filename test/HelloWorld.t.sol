@@ -6,6 +6,8 @@ import {Roles} from "@src/Roles.sol";
 import {MockHelloWorld} from "@test/mock/MockHelloWorld.sol";
 import {MockAccessManager} from "@test/mock/MockAccessManager.sol";
 
+import {MockMultisigWallet} from "@test/mock/MockMultisigWallet.sol";
+
 import {console} from "@forge-std/console.sol";
 import {console2} from "@forge-std/console2.sol";
 
@@ -15,6 +17,9 @@ contract TestHelloWorld is Test {
     address private admin = address(1);
     address public alice = address(2);
     address public bob = address(3);
+    address public ded = address(4);
+
+    uint256 confirmationCount = 2;
 
     uint256 HOUR = 60 * 60;
 
@@ -23,8 +28,18 @@ contract TestHelloWorld is Test {
 
     MockHelloWorld private helloWorld;
     MockAccessManager private accessManager;
+    MockMultisigWallet private multisigWallet;
 
     function setUp() public {
+        address[] memory owners = new address[](4);
+        // address[] memory owners;
+        owners[0] = admin;
+        owners[1] = alice;
+        owners[2] = bob;
+        owners[3] = ded;
+
+        multisigWallet = new MockMultisigWallet(owners, confirmationCount);
+
         accessManager = new MockAccessManager(admin);
         helloWorld = new MockHelloWorld(address(accessManager));
 
@@ -133,8 +148,8 @@ contract TestHelloWorld is Test {
         // console.log("================test===============");
         // vm.expectEmit(true, true, false, true, address(helloWorld));
         // emit HelloWorld();
-        bytes4 FUNC_SELECTOR = bytes4(keccak256("hello()"));
-        bytes memory data = abi.encodeWithSelector(FUNC_SELECTOR);
+        // bytes4 FUNC_SELECTOR = bytes4(keccak256("hello()"));
+        // bytes memory data = abi.encodeWithSelector(FUNC_SELECTOR);
 
         // vm.warp(block.timestamp + EXECUTION_DELAY);
         // vm.prank(alice);
@@ -154,6 +169,51 @@ contract TestHelloWorld is Test {
         // vm.expectRevert();
 
         helloWorld.hello();
+    }
+
+    function testExecutionWithAccessManager() public {
+        bool isGoverner;
+        uint256 roleDelay;
+
+        vm.prank(admin);
+        accessManager.grantRole(Roles.GOVERNOR, address(multisigWallet), 0);
+
+        // Check has role
+        (isGoverner, roleDelay) = accessManager.hasRole(
+            Roles.GOVERNOR,
+            address(multisigWallet)
+        );
+
+        assertEq(isGoverner, true);
+        assertEq(roleDelay, 0);
+
+        bytes4[] memory selectors2;
+        selectors2 = new bytes4[](1);
+        selectors2[0] = bytes4(keccak256("hello()"));
+
+        vm.prank(admin);
+        accessManager.setTargetFunctionRole(
+            address(helloWorld),
+            selectors2,
+            Roles.GOVERNOR
+        );
+
+        vm.startPrank(ded);
+        multisigWallet.submitTransaction(
+            address(helloWorld),
+            0,
+            multisigWallet.getDataWithAccessManager()
+        );
+        vm.stopPrank();
+
+        vm.prank(alice);
+        multisigWallet.confirmTransaction(0);
+
+        vm.prank(bob);
+        multisigWallet.confirmTransaction(0);
+
+        vm.prank(ded);
+        multisigWallet.executeTransaction(0);
     }
 
     receive() external payable {}

@@ -13,11 +13,16 @@ import {console2} from "@forge-std/console2.sol";
 /// @notice defines some modifiers and utilities around interacting with Core
 contract HelloWorld is AccessManaged {
     event HelloWorldEvent();
+    event HelloWorldMultisigEvent();
 
     constructor(address manager) AccessManaged(manager) {}
 
     function hello() public restricted {
         emit HelloWorldEvent();
+    }
+
+    function multisig() public {
+        emit HelloWorldMultisigEvent();
     }
 
     // authority()

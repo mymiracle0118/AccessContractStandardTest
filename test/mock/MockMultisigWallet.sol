@@ -8,4 +8,12 @@ contract MockMultisigWallet is MultiSigWallet {
         address[] memory _owners,
         uint _numConfirmationsRequired
     ) MultiSigWallet(_owners, _numConfirmationsRequired) {}
+
+    function getDataWithoutAccessManager() public pure returns (bytes memory) {
+        return abi.encodeWithSignature("multisig()");
+    }
+
+    function getDataWithAccessManager() public pure returns (bytes memory) {
+        return abi.encodeWithSignature("hello()");
+    }
 }
