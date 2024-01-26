@@ -12,12 +12,12 @@ import {console2} from "@forge-std/console2.sol";
 /// @author Iwaki Hiroto
 /// @notice defines some modifiers and utilities around interacting with Core
 contract HelloWorld is AccessManaged {
-    event HelloWorld();
+    event HelloWorldEvent();
 
     constructor(address manager) AccessManaged(manager) {}
 
     function hello() public restricted {
-        emit HelloWorld();
+        emit HelloWorldEvent();
     }
 
     // authority()

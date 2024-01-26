@@ -9,7 +9,7 @@ import {MockAccessManager} from "@test/mock/MockAccessManager.sol";
 import {console} from "@forge-std/console.sol";
 import {console2} from "@forge-std/console2.sol";
 
-contract TesthelloWorld is Test {
+contract TestHelloWorld is Test {
     event HelloWorld();
 
     address private admin = address(1);
@@ -18,16 +18,15 @@ contract TesthelloWorld is Test {
 
     uint256 HOUR = 60 * 60;
 
-    uint256 GRANT_DELAY = 24 * HOUR;
-    uint256 EXECUTION_DELAY = 5 * HOUR;
-    uint256 ACCOUNT = admin;
+    uint32 GRANT_DELAY = 24 hours;
+    uint32 EXECUTION_DELAY = 5 hours;
 
     MockHelloWorld private helloWorld;
     MockAccessManager private accessManager;
 
     function setUp() public {
         accessManager = new MockAccessManager(admin);
-        helloWorld = new MockHelloWorld(accessManager);
+        helloWorld = new MockHelloWorld(address(accessManager));
 
         vm.prank(admin);
         accessManager.setGrantDelay(Roles.ADMIN, GRANT_DELAY);
@@ -43,22 +42,18 @@ contract TesthelloWorld is Test {
         accessManager.labelRole(Roles.ADMIN, "ADMIN");
     }
 
-    // function testSchedule() public {
-    //     accessManager.schedule(helloWorld, )
-    // }
-
     function testTargetClose() public {
         vm.prank(admin);
-        accessManager.setTargetClosed(helloWorld, true);
+        accessManager.setTargetClosed(address(helloWorld), true);
 
         vm.expectRevert();
         vm.prank(admin);
         helloWorld.hello();
 
         vm.prank(admin);
-        accessManager.setTargetClosed(helloWorld, false);
+        accessManager.setTargetClosed(address(helloWorld), false);
 
-        assertEq(accessManager.isTargetClosed(helloWorld), true);
+        assertEq(accessManager.isTargetClosed(address(helloWorld)), true);
 
         vm.expectRevert();
         helloWorld.hello();
@@ -66,7 +61,7 @@ contract TesthelloWorld is Test {
         vm.expectEmit(true, true, false, true, address(helloWorld));
         emit HelloWorld();
 
-        assertEq(accessManager.isTargetClosed(helloWorld), false);
+        assertEq(accessManager.isTargetClosed(address(helloWorld)), false);
     }
 
     function testRoleRestriction() public {
@@ -79,9 +74,11 @@ contract TesthelloWorld is Test {
         assertEq(isGoverner, true);
         assertEq(roleDelay, EXECUTION_DELAY);
 
+        bytes4[] memory selectors;
+        selectors[0] = bytes4(keccak256("hello()"));
         accessManager.setTargetFunctionRole(
-            helloWorld,
-            [helloWorld.hello.selector],
+            address(helloWorld),
+            selectors,
             Roles.GOVERNOR
         );
         vm.prank(alice);
@@ -99,94 +96,6 @@ contract TesthelloWorld is Test {
 
         helloWorld.hello();
     }
-
-    // function testSetCoreSucceeds() public {
-    //     Core core2 = new Core();
-
-    //     vm.prank(admin);
-
-    //     vm.expectEmit(true, true, false, true, address(helloWorld));
-    //     emit HellowUpdate(address(core), address(core2));
-
-    //     helloWorld.setCore(address(core2));
-
-    //     assertEq(address(helloWorld.core()), address(core2));
-    // }
-
-    // function testSetCoreAddressZeroSucceedsBricksContract() public {
-    //     vm.prank(admin);
-    //     vm.expectEmit(true, true, false, true, address(helloWorld));
-    //     emit HellowUpdate(address(core), address(0));
-
-    //     helloWorld.setCore(address(0));
-
-    //     assertEq(address(helloWorld.core()), address(0));
-
-    //     // cannot check role because core doesn't respond
-    //     vm.expectRevert();
-    //     helloWorld.pause();
-    // }
-
-    // function testSetCoreFails() public {
-    //     vm.expectRevert("UNAUTHORIZED");
-    //     helloWorld.setCore(address(0));
-
-    //     assertEq(address(helloWorld.core()), address(core));
-    // }
-
-    // function testHelloWorldForAdmin() public {
-    //     vm.prank(admin);
-
-    //     vm.expectEmit(true, true, false, true, address(helloWorld));
-    //     emit HellowWorldAdmin();
-
-    //     helloWorld.helloWorldAdmin();
-
-    //     vm.expectRevert();
-    //     vm.prank(address(this));
-    //     helloWorld.helloWorldAdmin();
-    // }
-
-    // function testHelloWorldForGoverner() public {
-    //     vm.prank(governor);
-
-    //     vm.expectEmit(true, true, false, true, address(helloWorld));
-    //     emit HellowWorldGoverner();
-
-    //     helloWorld.helloWorlGoverner();
-
-    //     vm.expectRevert();
-    //     vm.prank(address(this));
-    //     helloWorld.helloWorlGoverner();
-    // }
-
-    // function testHelloWorldForUser() public {
-    //     vm.prank(user);
-
-    //     vm.expectEmit(true, true, false, true, address(helloWorld));
-    //     emit HellowWorldUser();
-
-    //     helloWorld.helloWorldUser();
-
-    //     vm.expectRevert();
-    //     vm.prank(address(this));
-    //     helloWorld.helloWorldUser();
-    // }
-
-    // function testPausableSucceedsGuardian() public {
-    //     assertTrue(!helloWorld.paused());
-    //     vm.prank(guardian);
-    //     helloWorld.pause();
-    //     assertTrue(helloWorld.paused());
-    //     vm.prank(guardian);
-    //     helloWorld.unpause();
-    //     assertTrue(!helloWorld.paused());
-    // }
-
-    // function testPauseFailsNonGuardian() public {
-    //     vm.expectRevert("UNAUTHORIZED");
-    //     helloWorld.pause();
-    // }
 
     receive() external payable {}
 }
