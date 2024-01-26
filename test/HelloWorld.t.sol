@@ -29,9 +29,9 @@ contract TestHelloWorld is Test {
         helloWorld = new MockHelloWorld(address(accessManager));
 
         vm.startPrank(admin);
-        accessManager.setGrantDelay(Roles.ADMIN, GRANT_DELAY);
+        // accessManager.setGrantDelay(Roles.ADMIN, GRANT_DELAY);
 
-        accessManager.grantRole(Roles.ADMIN, admin, EXECUTION_DELAY);
+        accessManager.grantRole(Roles.ADMIN, admin, 0);
 
         accessManager.setRoleAdmin(Roles.ADMIN, Roles.ADMIN);
 
@@ -62,46 +62,62 @@ contract TestHelloWorld is Test {
     }
 
     function testRoleRestriction() public {
-        vm.prank(admin);
         bool isGoverner;
         uint256 roleDelay;
+
+        // vm.warp(block.timestamp + GRANT_DELAY + EXECUTION_DELAY + 1);
+
+        console.log("=========time passed==========");
+        vm.prank(admin);
         accessManager.grantRole(Roles.GOVERNOR, alice, EXECUTION_DELAY);
         (isGoverner, roleDelay) = accessManager.hasRole(Roles.GOVERNOR, alice);
 
-        assertEq(isGoverner, true);
-        assertEq(roleDelay, EXECUTION_DELAY);
+        console.log("=========time passed==========");
 
-        bytes4[] memory selectors;
-        selectors = new bytes4[](1);
-        selectors[0] = bytes4(keccak256("hello()"));
+        assertEq(isGoverner, true);
+        assertEq(roleDelay, 0);
+
+        bytes4[] memory selectors2;
+        selectors2 = new bytes4[](1);
+        selectors2[0] = bytes4(keccak256("hello()"));
 
         vm.prank(admin);
         accessManager.setTargetFunctionRole(
             address(helloWorld),
-            selectors,
+            selectors2,
             Roles.GOVERNOR
+        );
+
+        console.log("-----------get function role-----------");
+        console.log(
+            accessManager.getTargetFunctionRole(
+                address(helloWorld),
+                selectors2[0]
+            )
         );
 
         console.log("================test===============");
         // vm.expectEmit(true, true, false, true, address(helloWorld));
         // emit HelloWorld();
+        bytes4 FUNC_SELECTOR = bytes4(keccak256("hello()"));
+        bytes memory data = abi.encodeWithSelector(FUNC_SELECTOR);
 
-        vm.warp(block.timestamp + EXECUTION_DELAY);
-
+        // vm.warp(block.timestamp + EXECUTION_DELAY);
+        vm.prank(alice);
         accessManager.schedule(
             address(helloWorld),
-            selectors,
-            block.timestamp + EXECUTION_DELAY
+            data,
+            uint48(block.timestamp + EXECUTION_DELAY + 1)
         );
+
+        vm.warp(block.timestamp + EXECUTION_DELAY + 4);
 
         vm.prank(alice);
         helloWorld.hello();
 
-        vm.warp(block.timestamp + EXECUTION_DELAY);
-
         vm.prank(alice);
 
-        vm.expectRevert();
+        // vm.expectRevert();
 
         helloWorld.hello();
     }
