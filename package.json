@@ -10,7 +10,7 @@
     "clean": "forge clean",
     "slither": "slither .",
     "test": "npm run test:unit",
-    "test:unit": "forge test --match-path ./test/** -vvv",
+    "test:unit": "forge test --match-path ./test/** -vvvvv",
     "test:core": "forge test --match-path ./test/HelloWorld.t.sol -vvvvv --match-test testSetCoreSucceeds"
   },
   "authors": "Iwaki Hiroto",
